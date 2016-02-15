@@ -3,7 +3,7 @@
 
 //! # dynamic
 //!
-//! A dyanmically typed value with fast downcasting.
+//! A dynamically typed value with fast downcasting.
 //!
 
 extern crate unsafe_any as uany;
@@ -20,7 +20,7 @@ use std::{fmt, mem};
 /// information can be implemented without virtual calls.
 ///
 /// Not Sized, since the size of the type is determined at runtime, so must be
-/// used behind a pointer (e.g. `&Dynamic`, `Box<Dynamic`, etc.)
+/// used behind a pointer (e.g. `&Dynamic`, `Box<Dynamic>`, etc.)
 pub struct Dynamic {
     id: TypeId,
     data: Dyn
