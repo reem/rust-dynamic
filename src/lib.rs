@@ -5,6 +5,10 @@
 //!
 //! A dynamically typed value with fast downcasting.
 //!
+//! Provides a `Dynamic` type, which contains a dynamically typed value.
+//! `Dynamic` is similar to `Any` from `std::any::Any`, except that downcasting
+//! does not involve any virtual calls since the `TypeId` of the contained
+//! value is pre-computed.
 
 extern crate unsafe_any as uany;
 
