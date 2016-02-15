@@ -1,4 +1,5 @@
 #![cfg_attr(test, deny(warnings))]
+#![cfg_attr(feature = "nightly", feature(test))]
 #![deny(missing_docs)]
 
 //! # dynamic
@@ -180,6 +181,44 @@ mod test {
 
         let z_ref = Dynamic::from_ref(&described_z);
         assert_eq!(z_ref.downcast_ref::<Z>().unwrap().0, 1000);
+    }
+}
+
+#[cfg(all(test, feature = "nightly"))]
+mod bench {
+    extern crate test;
+
+    use std::any::Any;
+    use Dynamic;
+
+    struct X(usize);
+
+    #[bench]
+    fn bench_dynamic_downcast(b: &mut test::Bencher) {
+        let mut x = Dynamic::new(X(100));
+
+        // Needed or else the benchmark gets optimized away.
+        test::black_box(&mut x);
+
+        b.iter(|| {
+            for _ in 0..10 {
+                test::black_box(x.downcast_mut::<X>());
+            }
+        });
+    }
+
+    #[bench]
+    fn bench_any_downcast(b: &mut test::Bencher) {
+        let mut x = Box::new(X(100)) as Box<Any>;
+
+        // Needed or else the benchmark gets optimized away.
+        test::black_box(&mut x);
+
+        b.iter(|| {
+            for _ in 0..10 {
+                test::black_box(x.downcast_mut::<X>());
+            }
+        });
     }
 }
 

@@ -11,3 +11,6 @@ license = "MIT"
 [dependencies]
 unsafe-any = "0.4"
 
+[features]
+nightly = []
+
