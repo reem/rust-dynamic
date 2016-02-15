@@ -22,7 +22,7 @@ use std::{fmt, mem};
 /// Not Sized, since the size of the type is determined at runtime, so must be
 /// used behind a pointer (e.g. `&Dynamic`, `Box<Dynamic`, etc.)
 pub struct Dynamic {
-    desc: Descriptor,
+    id: TypeId,
     data: Dyn
 }
 
@@ -33,7 +33,7 @@ impl Dynamic {
     #[inline]
     pub fn new<T: Any>(val: T) -> Box<Dynamic> {
         let un_sized = Box::new(Described {
-            desc: Descriptor::new::<T>(),
+            id: TypeId::of::<T>(),
             data: val
         }) as Box<Described<Dyn>>;
 
@@ -58,16 +58,14 @@ impl Dynamic {
         unsafe { mem::transmute(un_sized) }
     }
 
-    /// Read the type Descriptor for the contained value.
+    /// Read the type id for the contained value.
     #[inline]
-    pub fn descriptor(&self) -> Descriptor {
-        self.desc
-    }
+    pub fn id(&self) -> TypeId { self.id }
 
     /// Check if the contained type is a `T`.
     #[inline(always)]
     pub fn is<T: Any>(&self) -> bool {
-        self.desc.id == TypeId::of::<T>()
+        self.id == TypeId::of::<T>()
     }
 
     /// If the contained value is a `T`, downcast back to it.
@@ -106,7 +104,7 @@ impl Dynamic {
 impl fmt::Debug for Dynamic {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Dynamic")
-            .field("descriptor", &self.desc)
+            .field("id", &self.id)
             .field("data", &"{{ dynamically typed value }}")
             .finish()
     }
@@ -117,9 +115,9 @@ impl fmt::Debug for Dynamic {
 /// Can be converted to a `Dynamic` value.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Described<T: ?Sized> {
-    // The Descriptor is private to prevent mutation, as a user could then
+    // The TypeId is private to prevent mutation, as a user could then
     // invalidate it.
-    desc: Descriptor,
+    id: TypeId,
 
     /// The described data.
     pub data: T
@@ -130,45 +128,14 @@ impl<T: Any> Described<T> {
     #[inline]
     pub fn new(val: T) -> Described<T> {
         Described {
-            desc: Descriptor::new::<T>(),
+            id: TypeId::of::<T>(),
             data: val
         }
     }
 
-    /// Read the type Descriptor for this value.
+    /// Read the type id for this value.
     #[inline]
-    pub fn descriptor(&self) -> Descriptor { self.desc }
-}
-
-/// A type descriptor, containing metadata about a type.
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Descriptor {
-    /// The compiler-generated unique id of the type.
-    ///
-    /// As given by `TypeId::of::<T>()`
-    pub id: TypeId,
-
-    /// The size of the type.
-    ///
-    /// As given by `mem::size_of::<T>()`
-    pub size: usize,
-
-    /// The alignment of the type.
-    ///
-    /// As given by `mem::align_of::<T>()`
-    pub alignment: usize
-}
-
-impl Descriptor {
-    /// Create a
-    #[inline(always)]
-    pub fn new<T: Any>() -> Self {
-        Descriptor {
-            id: TypeId::of::<T>(),
-            size: mem::size_of::<T>(),
-            alignment: mem::align_of::<T>()
-        }
-    }
+    pub fn id(&self) -> TypeId { self.id }
 }
 
 // Empty trait for small vtables.
@@ -180,7 +147,8 @@ unsafe impl UnsafeAnyExt for Dyn {}
 
 #[cfg(test)]
 mod test {
-    use {Dynamic, Described, Descriptor};
+    use std::any::TypeId;
+    use {Dynamic, Described};
 
     struct X(usize);
     struct Y(usize);
@@ -198,7 +166,7 @@ mod test {
         assert_eq!(x.downcast_ref::<X>().unwrap().0, 100);
 
         let described_x = x.downcast::<X>().unwrap();
-        assert_eq!(described_x.descriptor(), Descriptor::new::<X>());
+        assert_eq!(described_x.id(), TypeId::of::<X>());
         assert_eq!(described_x.data.0, 100);
     }
 
