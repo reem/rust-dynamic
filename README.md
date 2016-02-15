@@ -9,7 +9,7 @@ with the rest of your dependencies:
 
 ```toml
 [dependencies]
-dynamic = "*"
+dynamic = "0.1"
 ```
 
 ## Author
