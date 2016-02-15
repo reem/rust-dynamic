@@ -2,7 +2,7 @@
 
 > A dyanmically typed value with fast downcasting.
 
-## [Documentation](https://crates.fyi/crates/dynamic/0.2.0)
+## [Documentation](https://crates.fyi/crates/dynamic/0.2.1)
 
 Provides a `Dynamic` type, which contains a dynamically typed value. `Dynamic`
 is similar to `Any` from `std::any::Any`, except that downcasting does not
