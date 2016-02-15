@@ -1,6 +1,6 @@
 # dynamic
 
-> A dyanmically typed value with fast downcasting.
+> A dynamically typed value with fast downcasting.
 
 ## [Documentation](https://crates.fyi/crates/dynamic/0.2.1)
 
